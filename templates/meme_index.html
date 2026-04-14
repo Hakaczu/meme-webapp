@@ -20,7 +20,7 @@
             <nav class="nav">
                 <ul class="nav-list">
                     <li class="nav-item">
-                        <a class="pure-button" onClick="window.location.reload();">Refresh</a>
+                        <a class="pure-button" id="refresh-btn" onclick="fetchMeme()">Refresh</a>
                     </li>
                 </ul>
             </nav>
@@ -29,25 +29,18 @@
 
     <div class="content pure-u-1 pure-u-md-3-4">
         <div>
-            <!-- A wrapper for all the blog posts -->
             <div class="posts">
-                <h1 class="content-subhead">Subreddit: {{ subreddit }} </h1>
+                <h1 class="content-subhead" id="subreddit-label">Subreddit: {{ subreddit }} </h1>
 
-                <!-- A single blog post -->
-                <section class="post">
+                <section class="post" id="meme-post">
                     <header class="post-header">
-                    
-
-                        <h2 class="post-title">{{ meme_title }}</h2>
-
-                        <p class="post-meta">
-                            By {{ author}}
-                        </p>
+                        <h2 class="post-title" id="meme-title">{{ meme_title }}</h2>
+                        <p class="post-meta" id="meme-author">By {{ author}}</p>
                     </header>
 
                     <div class="post-description">
                         <p>
-                            <img class="pure-img" src="{{meme_pic}}">
+                            <img class="pure-img" id="meme-img" src="{{meme_pic}}">
                         </p>
                     </div>
                 </section>
@@ -63,6 +56,40 @@
         </div>
     </div>
 </div>
+
+<script>
+async function fetchMeme() {
+    const btn = document.getElementById('refresh-btn');
+    const post = document.getElementById('meme-post');
+
+    btn.textContent = 'Loading...';
+    btn.style.pointerEvents = 'none';
+    post.classList.add('loading');
+
+    try {
+        const res = await fetch('/api/meme');
+        if (!res.ok) throw new Error('API error');
+        const data = await res.json();
+
+        document.getElementById('subreddit-label').textContent = 'Subreddit: ' + data.subreddit;
+        document.getElementById('meme-title').textContent = data.title;
+        document.getElementById('meme-author').textContent = 'By ' + data.author;
+
+        const img = document.getElementById('meme-img');
+        img.src = data.meme_pic;
+
+        post.classList.remove('loading');
+        post.style.animation = 'none';
+        post.offsetHeight; // trigger reflow
+        post.style.animation = '';
+    } catch {
+        window.location.reload();
+    } finally {
+        btn.textContent = 'Refresh';
+        btn.style.pointerEvents = '';
+    }
+}
+</script>
 
 </body>
 </html>

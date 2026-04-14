@@ -89,8 +89,27 @@ h3 {
     padding: 2em 1em 0;
 }
 
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
 .post {
     padding-bottom: 2em;
+    animation: fadeIn 0.4s ease;
+}
+
+.post.loading {
+    opacity: 0.3;
+    transition: opacity 0.2s ease;
+}
+
+.post-description img {
+    max-height: 75vh;
+    width: auto;
+    max-width: 100%;
+    display: block;
+    margin: 0 auto;
 }
 .post-title {
     font-size: 2em;
@@ -153,6 +172,21 @@ h3 {
 .footer .pure-menu a:hover,
 .footer .pure-menu a:focus {
     background: none;
+}
+
+@media (max-width: 48em) {
+    .sidebar {
+        padding: 1em;
+    }
+    .header {
+        margin: 1em auto;
+    }
+    .brand-title {
+        font-size: 1.5em;
+    }
+    .brand-tagline {
+        font-size: 0.9em;
+    }
 }
 
 @media (min-width: 48em) {
