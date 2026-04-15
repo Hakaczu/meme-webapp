@@ -3,92 +3,170 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="A layout example that shows off a blog page with a list of posts.">
-    <title>Reddit Memes</title>
-    <link rel="stylesheet" href="{{ url_for('static',filename='styles/pure-min.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static',filename='styles/grids-responsive-min.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static',filename='styles/styles.css') }}">
+    <title>Meme Tinder</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/styles.css') }}">
 </head>
 <body>
 
-<div id="layout" class="pure-g">
-    <div class="sidebar pure-u-1 pure-u-md-1-4">
-        <div class="header">
-            <h1 class="brand-title">Reddit Memes</h1>
-            <h2 class="brand-tagline">Proudly made by Hakaczu and <a href="https://github.com/D3vd/Meme_Api">D3vd/Meme_Api</a></h2>
+<div id="layout">
+    <div class="sidebar">
+        <div class="brand">
+            <h1 class="brand-title">Meme Tinder</h1>
+            <p class="brand-tagline">via <a href="https://github.com/D3vd/Meme_Api" target="_blank">D3vd/Meme_Api</a></p>
+        </div>
 
-            <nav class="nav">
-                <ul class="nav-list">
-                    <li class="nav-item">
-                        <a class="pure-button" id="refresh-btn" onclick="fetchMeme()">Refresh</a>
-                    </li>
-                </ul>
-            </nav>
+        <div class="stats">
+            <div class="stat-card">
+                <span class="stat-icon">♥</span>
+                <div>
+                    <div class="stat-value" id="stat-likes">0</div>
+                    <div class="stat-label">Liked</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <span class="stat-icon">✕</span>
+                <div>
+                    <div class="stat-value" id="stat-mehs">0</div>
+                    <div class="stat-label">Meh</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="sidebar-footer">
+            <a href="https://github.com/Hakaczu/meme-webapp" target="_blank">GitHub</a>
         </div>
     </div>
 
-    <div class="content pure-u-1 pure-u-md-3-4">
-        <div>
-            <div class="posts">
-                <h1 class="content-subhead" id="subreddit-label">Subreddit: {{ subreddit }} </h1>
+    <div class="content">
+        <div class="card-stack">
+            <div class="card-ghost card-ghost-2"></div>
+            <div class="card-ghost card-ghost-1"></div>
 
-                <section class="post" id="meme-post">
-                    <header class="post-header">
-                        <h2 class="post-title" id="meme-title">{{ meme_title }}</h2>
-                        <p class="post-meta" id="meme-author">By {{ author}}</p>
-                    </header>
-
-                    <div class="post-description">
-                        <p>
-                            <img class="pure-img" id="meme-img" src="{{meme_pic}}">
-                        </p>
+            <div class="meme-card entering" id="meme-card">
+                <div class="card-image">
+                    <img id="meme-img" src="{{ meme_pic }}" alt="meme">
+                    <div class="card-overlay">
+                        <span class="subreddit-badge" id="subreddit-label">r/{{ subreddit }}</span>
+                        <h2 class="meme-title" id="meme-title">{{ meme_title }}</h2>
+                        <p class="meme-author" id="meme-author">by {{ author }}</p>
                     </div>
-                </section>
-            </div>
-
-            <div class="footer">
-                <div class="pure-menu pure-menu-horizontal">
-                    <ul>
-                        <li class="pure-menu-item"><a href="https://github.com/Hakaczu/meme-webapp" class="pure-menu-link">GitHub</a></li>
-                    </ul>
                 </div>
             </div>
+        </div>
+
+        <div class="action-buttons">
+            <button id="meh-btn" class="vote-btn vote-meh" onclick="vote('meh')">
+                <span class="btn-icon">✕</span>
+            </button>
+            <button id="like-btn" class="vote-btn vote-like" onclick="vote('like')">
+                <span class="btn-icon">♥</span>
+            </button>
         </div>
     </div>
 </div>
 
 <script>
-async function fetchMeme() {
-    const btn = document.getElementById('refresh-btn');
-    const post = document.getElementById('meme-post');
+// Bufor kolejnego mema – prefetchujemy zanim użytkownik kliknie
+let _next = null; // { meme: {...}, ready: boolean }
 
-    btn.textContent = 'Loading...';
-    btn.style.pointerEvents = 'none';
-    post.classList.add('loading');
-
+async function prefetchNext() {
+    _next = { meme: null, ready: false };
     try {
         const res = await fetch('/api/meme');
-        if (!res.ok) throw new Error('API error');
+        if (!res.ok) return;
         const data = await res.json();
+        // Wczytaj obrazek do cache przeglądarki
+        await new Promise(resolve => {
+            const img = new Image();
+            img.onload = img.onerror = resolve;
+            img.src = data.meme_pic;
+        });
+        _next = { meme: data, ready: true };
+    } catch { /* cicho — fallback do fetch przy głosowaniu */ }
+}
 
-        document.getElementById('subreddit-label').textContent = 'Subreddit: ' + data.subreddit;
-        document.getElementById('meme-title').textContent = data.title;
-        document.getElementById('meme-author').textContent = 'By ' + data.author;
+async function vote(action) {
+    const btns = document.querySelectorAll('.vote-btn');
+    const card = document.getElementById('meme-card');
 
-        const img = document.getElementById('meme-img');
-        img.src = data.meme_pic;
+    btns.forEach(b => b.disabled = true);
+    card.classList.remove('entering');
+    card.classList.add(action === 'like' ? 'swipe-right' : 'swipe-left');
 
-        post.classList.remove('loading');
-        post.style.animation = 'none';
-        post.offsetHeight; // trigger reflow
-        post.style.animation = '';
+    try {
+        const votePromise = fetch('/api/' + action, { method: 'POST' });
+
+        let meme;
+        if (_next?.ready) {
+            // Obrazek już w cache – podmiana będzie natychmiastowa
+            meme = _next.meme;
+            _next = null;
+        } else {
+            // Fallback: pobierz i wczytaj obrazek równolegle z animacją swipe
+            const memeRes = await fetch('/api/meme');
+            if (!memeRes.ok) throw new Error('API error');
+            meme = await memeRes.json();
+            await new Promise(resolve => {
+                const img = new Image();
+                img.onload = img.onerror = resolve;
+                img.src = meme.meme_pic;
+            });
+        }
+
+        const voteRes = await votePromise;
+        if (!voteRes.ok) throw new Error('API error');
+        const stats = await voteRes.json();
+
+        await new Promise(r => setTimeout(r, 380));
+
+        updateStats(stats);
+        updateMeme(meme);
+
+        card.classList.remove('swipe-right', 'swipe-left');
+        void card.offsetWidth;
+        card.classList.add('entering');
+
+        // Zacznij prefetchować następny mem
+        prefetchNext();
     } catch {
         window.location.reload();
     } finally {
-        btn.textContent = 'Refresh';
-        btn.style.pointerEvents = '';
+        btns.forEach(b => b.disabled = false);
     }
 }
+
+function updateStats(s) {
+    document.getElementById('stat-likes').textContent = s.likes;
+    document.getElementById('stat-mehs').textContent  = s.mehs;
+}
+
+function updateMeme(d) {
+    document.getElementById('subreddit-label').textContent = 'r/' + d.subreddit;
+    document.getElementById('meme-title').textContent      = d.title;
+    document.getElementById('meme-author').textContent     = 'by ' + d.author;
+    const img = document.getElementById('meme-img');
+    img.onload = syncGhosts;
+    img.src = d.meme_pic;
+}
+
+function syncGhosts() {
+    const card = document.getElementById('meme-card');
+    const h = card.offsetHeight;
+    document.querySelectorAll('.card-ghost').forEach(g => g.style.height = h + 'px');
+}
+
+window.addEventListener('DOMContentLoaded', async () => {
+    document.getElementById('meme-img').addEventListener('load', syncGhosts);
+    prefetchNext(); // zacznij prefetchować od razu po załadowaniu strony
+    try {
+        const res  = await fetch('/api/stats');
+        const data = await res.json();
+        updateStats(data);
+    } catch { /* stats stay at 0 */ }
+});
 </script>
 
 </body>

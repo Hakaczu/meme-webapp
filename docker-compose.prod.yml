@@ -1,6 +1,6 @@
 services:
   meme-webapp:
-    build: .
+    image: ghcr.io/hakaczu/meme-webapp:master
     ports:
       - "5050:5050"
     environment:
