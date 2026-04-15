@@ -1,0 +1,8 @@
+services:
+  meme-webapp:
+    build: .
+    ports:
+      - "5050:5050"
+    environment:
+      - FLASK_DEBUG=false
+    restart: unless-stopped
