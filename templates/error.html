@@ -3,63 +3,44 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="A layout example that shows off a blog page with a list of posts.">
-    <title>Reddit Memes</title>
-    <link rel="stylesheet" href="{{ url_for('static',filename='styles/pure-min.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static',filename='styles/grids-responsive-min.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static',filename='styles/styles.css') }}">
+    <title>Meme Tinder – Error</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/styles.css') }}">
 </head>
 <body>
 
-<div id="layout" class="pure-g">
-    <div class="sidebar pure-u-1 pure-u-md-1-4">
-        <div class="header">
-            <h1 class="brand-title">Reddit Memes</h1>
-            <h2 class="brand-tagline">Proudly made by Hakaczu and <a href="https://github.com/D3vd/Meme_Api">D3vd/Meme_Api</a></h2>
+<div id="layout">
+    <div class="sidebar">
+        <div class="brand">
+            <h1 class="brand-title">Meme Tinder</h1>
+            <p class="brand-tagline">via <a href="https://github.com/D3vd/Meme_Api" target="_blank">D3vd/Meme_Api</a></p>
+        </div>
 
-            <nav class="nav">
-                <ul class="nav-list">
-                    <li class="nav-item">
-                        <a class="pure-button" onClick="window.location.reload();">Refresh</a>
-                    </li>
-                </ul>
-            </nav>
+        <div class="sidebar-footer">
+            <a href="https://github.com/Hakaczu/meme-webapp" target="_blank">GitHub</a>
         </div>
     </div>
 
-    <div class="content pure-u-1 pure-u-md-3-4">
-        <div>
-            <!-- A wrapper for all the blog posts -->
-            <div class="posts">
-                <h1 class="content-subhead">Subreddit: Try Refresh Page </h1>
-
-                <!-- A single blog post -->
-                <section class="post">
-                    <header class="post-header">
-                    
-
-                        <h2 class="post-title">API Error</h2>
-
-                        <p class="post-meta">
-                            By Hakaczu
-                        </p>
-                    </header>
-
-                    <div class="post-description">
-                        <p>
-                            <img class="pure-img" src="{{ url_for('static',filename='img/error.jpg') }}">
-                        </p>
+    <div class="content">
+        <div class="card-stack">
+            <div class="meme-card entering">
+                <div class="card-image">
+                    <img src="{{ url_for('static', filename='img/error.jpg') }}" alt="error">
+                    <div class="card-overlay">
+                        <span class="subreddit-badge">r/oops</span>
+                        <h2 class="meme-title">API Error</h2>
+                        <p class="meme-author">Something went wrong – try again</p>
                     </div>
-                </section>
-            </div>
-
-            <div class="footer">
-                <div class="pure-menu pure-menu-horizontal">
-                    <ul>
-                        <li class="pure-menu-item"><a href="https://github.com/Hakaczu/meme-webapp" class="pure-menu-link">GitHub</a></li>
-                    </ul>
                 </div>
             </div>
+        </div>
+
+        <div class="action-buttons">
+            <button class="vote-btn vote-like" onclick="window.location.reload()">
+                <span class="btn-icon">↻</span>
+            </button>
         </div>
     </div>
 </div>
